@@ -5,6 +5,8 @@ import Vue from 'vue'
 Vue.config.productionTip = false
 App.mpType = 'app'
 
+import store from './store';
+
 try {
   function isPromise(obj) {
     return (
@@ -34,7 +36,8 @@ try {
 } catch (error) { }
 
 const app = new Vue({
-  ...App
+  ...App,
+  store
 })
 app.$mount()
 // #endif
