@@ -1,0 +1,61 @@
+{
+	"pages": [ //pages数组中第一项表示应用启动页，参考：https://uniapp.dcloud.io/collocation/pages
+		{
+			"path": "pages/index/index",
+			"style": {
+				"navigationBarTitleText": "首页"
+			}
+		}
+	    ,{
+            "path" : "pages/mine/mine",
+            "style" :                                                                                    
+            {
+                "navigationBarTitleText": "我的",
+                "enablePullDownRefresh": false
+            }
+            
+        }
+        ,{
+            "path" : "pages/schedule/schedule",
+            "style" :                                                                                    
+            {
+                "navigationBarTitleText": "课表",
+                "enablePullDownRefresh": false
+            }
+            
+        }
+    ],
+	"globalStyle": {
+		"navigationBarTextStyle": "black",
+		"navigationBarTitleText": "uni-app",
+		"navigationBarBackgroundColor": "#F8F8F8",
+		"backgroundColor": "#F8F8F8"
+	},
+	"uniIdRouter": {},
+	"tabBar": {
+	    "color": "#7A7E83",
+	    "selectedColor": "#007AFF",
+	    "backgroundColor": "#ffffff",
+	    "borderStyle": "black",
+		"list": [
+			{
+				"pagePath": "pages/index/index",
+				"text": "首页",
+				"iconPath": "/static/images/home.png",
+				"selectedIconPath": "/static/images/home-active.png"
+			},
+			{
+				"pagePath": "pages/schedule/schedule",
+				"text": "课表",
+				"iconPath": "/static/images/schedule.png",
+				"selectedIconPath": "/static/images/schedule-active.png"
+			},
+			{
+				"pagePath": "pages/mine/mine",
+				"text": "我的",
+				"iconPath": "/static/images/mine.png",
+				"selectedIconPath": "/static/images/mine-active.png"
+			}
+		]
+	}
+}
