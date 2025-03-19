@@ -167,7 +167,7 @@ export default {
 
 	/**
 	 * 跳转到登录页面
-	 */
+	 */ 
 	goToLogin() {
 	  uni.navigateTo({
 		url: '/pages/login/login'
