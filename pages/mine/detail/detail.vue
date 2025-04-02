@@ -4,11 +4,10 @@
    <view class="header">
      <image class="avatar" src="/static/images/mine/avatar.jpg" mode="aspectFill"/>
      <view class="user-info">
-       <text class="name">111</text><br />
-       <text class="meta">19岁</text><br />
-       <text class="meta">信息工程学院</text><br />
-       <text class="meta" style="margin-right: 20rpx;">计算机应用技术</text>
-       <text class="meta">3班</text>
+	   <text class="name">{{ userInfo.xm }}</text><br />
+       <!-- <text class="meta">{{ userInfo.age }}岁</text><br /> -->
+       <text class="meta">{{ userInfo.yxb }}</text><br />
+       <text class="meta" style="margin-right: 20rpx;">{{ userInfo.bjmc }}</text>
      </view>
      <icon type="camera" size="20" class="camera"/>
    </view>
@@ -17,31 +16,35 @@
      <view class="info-item">
        <text class="label">学号</text>
        <view class="value-group">
-         <text>20238030000</text>
-         <image src="/icons/lock.svg" class="lock-icon"/>
+         <text>{{ userInfo.yhxh }}</text>
+         <!-- <image src="/icons/lock.svg" class="lock-icon"/> -->
        </view>
      </view>
      
      <view class="info-item">
        <text class="label">入学日期</text>
-       <text class="value">2023-9-7</text>
+       <text class="value">{{ userInfo.bdtime }}</text>	
      </view>
  
    </view>
    <view class="info-item">
-     <text class="label">身份证</text>
-     <text>1234 **** 4567 1234</text>
+     <text class="label">地址</text>
+     <text>{{ userInfo.txdz }}</text>
    </view>
  </view>
 </template>
 
 <script>
+	import { mapState } from 'vuex';
 	export default {
 		data() {
 			return {
 				
 			};
-		}
+		},
+		computed: {
+			...mapState(['userInfo']) // 将 store 中的 userInfo 映射为组件的计算属性
+		},
 	}
 </script>
 

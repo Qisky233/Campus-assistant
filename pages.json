@@ -59,6 +59,27 @@
                 "enablePullDownRefresh": false
             }
             
+        },
+        {
+        	"path" : "pages/login/login",
+        	"style" : 
+        	{
+        		"navigationBarTitleText" : ""
+        	}
+        },
+        {
+        	"path" : "pages/feature/lost/lost",
+        	"style" : 
+        	{
+        		"navigationBarTitleText" : ""
+        	}
+        },
+        {
+        	"path" : "pages/feature/motoo/motoo",
+        	"style" : 
+        	{
+        		"navigationBarTitleText" : ""
+        	}
         }
     ],
 	"globalStyle": {

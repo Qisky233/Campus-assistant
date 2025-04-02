@@ -4,12 +4,12 @@
     <div class="header">
       <img src="/static/images/mine/avatar.jpg" class="avatar" alt="avatar" />
       <div class="user-info">
-        <div class="username">{{ xm }}</div>
+        <div class="username">{{ userInfo.xm }}</div>
         <div class="tag">未实名认证</div>
       </div>
       <div class="homepage-button" @click="navigateToDetail">
         个人信息
-        <img src="/static/images/mine/arrow-right（write）.png" class="arrow" alt="arrow" />
+        <img src="/static/images/mine/arrow-right_write.png" class="arrow" alt="arrow" />
       </div>
     </div>
 
@@ -33,7 +33,7 @@
     </div>
 
     <!-- 未登录时显示登录按钮 -->
-    <div v-if="!jsessionid" class="login-container">
+    <div v-if="!isLoggedIn" class="login-container">
       <button @click="goToLogin" class="login-button">登录</button>
     </div>
 
@@ -41,138 +41,92 @@
     <div v-else class="logout-container">
       <button @click="logout" class="logout-button">退出登录</button>
     </div>
-    <div class="logout-container">
+	<!-- <div class="logout-container">
       <div>{{ jsessionid }}</div>
     </div>
+    <div class="logout-container">
+      <div>{{ tgt }}</div>
+    </div>
+    <div class="logout-container">
+      <div>{{ ticket }}</div>
+    </div> -->
   </div>
 </template>
 
 <script>
+import { mapGetters, mapActions } from 'vuex';
+
 export default {
-  data() {
-    return {
-      xm: "未登录", // 用户名，默认值为“未登录”
-      jsessionid: "", // 用于存储 jsessionid
-      ticket: "",
-      tgt: ""
-    };
+  computed: {
+    ...mapGetters([
+      'isLoggedIn',
+      'getJsessionid',
+      'getUserInfo',
+	  'getTgt',
+	  'getTicket'
+    ]),
+    jsessionid() {
+      return this.getJsessionid;
+    },
+    userInfo() {
+      return this.getUserInfo;
+    },
+	tgt() {
+		return this.getTgt;
+	},
+	ticket() {
+		return this.getTicket
+	}
   },
   created() {
     this.checkLoginStatus();
   },
   methods: {
-    /**
-     * 检查登录状态
-     */
+    ...mapActions(['fetchUserInfo']),
+    
     checkLoginStatus() {
-      const jsessionid = this.$store.state.globalData.jsessionid || null; // 从全局状态中获取 jsessionid
-      this.jsessionid = jsessionid;
-
-      if (jsessionid) {
-        // 如果有 jsessionid，请求获取用户基本信息
+      if (this.isLoggedIn) {
         this.fetchUserInfo();
-      } else {
-        // 如果没有 jsessionid，显示“未登录”
-        this.xm = "未登录";
       }
     },
-
-    /**
-     * 请求获取用户基本信息
-     */
-    fetchUserInfo() {
-      const jsessionid = this.jsessionid;
-
-      if (!jsessionid) {
-        console.error("未获取到 JSESSIONID");
-        return;
-      }
-
-      this.$http
-        .get("https://jwgl.hnuu.edu.cn/hnlhdxjw/frame/home/js/SetMainInfo.jsp?v=230519", {
-          headers: {
-            Cookie: `JSESSIONID=${jsessionid}` // 携带 JSESSIONID 作为 Cookie
-          }
-        })
-        .then(response => {
-          const scriptContent = response.data;
-          const scriptRegex = /var _userName\s*=\s*'([^']+)';/;
-          const match = scriptRegex.exec(scriptContent);
-
-          if (match && match[1]) {
-            const userName = match[1]; // 提取用户名
-            this.xm = userName;
-          } else {
-            console.error("未找到用户名信息");
-            this.xm = "未知用户";
-          }
-        })
-        .catch(err => {
-          console.error("请求失败:", err);
-          this.xm = "请求失败";
-        });
+    
+    navigateToDetail() {
+      uni.navigateTo({
+        url: '/pages/mine/detail/detail'
+      });
     },
-
-	/**
-	 * 跳转到个人信息页面
-	 */
-	navigateToDetail() {
-	 //  if (!this.jsessionid) {
-		// this.$toast("请先登录");
-		// return;
-	 //  }
-	  uni.navigateTo({
-		url: '/pages/mine/detail/detail'
-	  });
-	},
-
-	/**
-	 * 跳转到我的课表页面
-	 */
-	goToCourse() {
-	 //  if (!this.jsessionid) {
-		// this.$toast("请先登录");
-		// return;
-	 //  }
-	  uni.navigateTo({
-		url: '/pages/mine/course/course'
-	  });
-	},
-
-	/**
-	 * 跳转到查电费页面
-	 */
-	goToElctric() {
-	 //  if (!this.jsessionid) {
-		// this.$toast("请先登录");
-		// return;
-	 //  }
-	  uni.navigateTo({
-		url: '/pages/mine/electric/electric'
-	  });
-	},
-
-	/**
-	 * 跳转到学期成绩页面
-	 */
-	goToScore() {
-	 //  if (!this.jsessionid) {
-		// this.$toast("请先登录");
-		// return;
-	 //  }
-	  uni.navigateTo({
-		url: '/pages/mine/score/score'
-	  });
-	},
-
-	/**
-	 * 跳转到登录页面
-	 */ 
-	goToLogin() {
-	  uni.navigateTo({
-		url: '/pages/login/login'
-	  });
-	}
+    
+    goToCourse() {
+      uni.navigateTo({
+        url: '/pages/mine/course/course'
+      });
+    },
+    
+    goToScore() {
+      uni.navigateTo({
+        url: '/pages/mine/score/score'
+      });
+    },
+    
+    goToElctric() {
+      uni.navigateTo({
+        url: '/pages/mine/electric/electric'
+      });
+    },
+    
+    goToLogin() {
+      uni.navigateTo({
+        url: '/pages/login/login'
+      });
+    },
+    
+    logout() {
+      this.$store.commit('clearAuth');
+      // 如果需要清除本地存储
+      uni.removeStorageSync('jsessionid');
+      uni.removeStorageSync('tgt');
+      uni.removeStorageSync('ticket');
+    }
   }
 };
 </script>
