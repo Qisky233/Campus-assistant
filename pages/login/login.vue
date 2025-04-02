@@ -46,8 +46,8 @@ import { encryptedString, key } from './RSA.js'
 export default {
   data() {
     return {
-      studentId: '202280310314',
-      password: '@Ganxianhong2012',
+      studentId: '202380310106',
+      password: 'yyj2005.',
       captcha: '',
       captchaImage: '',
       captchaUid: ''

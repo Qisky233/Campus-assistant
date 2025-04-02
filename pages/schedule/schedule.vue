@@ -2,13 +2,13 @@
   <view class="content">
     <view class="table-header">
       <view class="header-cell">时间</view>
-      <view class="header-cell">周一<br>03-10</view>
-      <view class="header-cell">周二<br>03-11</view>
-      <view class="header-cell">周三<br>03-12</view>
-      <view class="header-cell">周四<br>03-13</view>
-      <view class="header-cell">周五<br>03-14</view>
-      <view class="header-cell">周六<br>03-15</view>
-      <view class="header-cell">周日<br>03-16</view>
+      <view class="header-cell">周一</view>
+      <view class="header-cell">周二</view>
+      <view class="header-cell">周三</view>
+      <view class="header-cell">周四</view>
+      <view class="header-cell">周五</view>
+      <view class="header-cell">周六</view>
+      <view class="header-cell">周日</view>
     </view>
     <view class="time-container">
       <view class="time-column">
@@ -26,27 +26,72 @@
         <view class="time-slot">19:50<br>20:30</view>
       </view>
       <view class="course-container">
-        <view class="course-block course-1" 
-              style="top: 0; height: 180rpx;">
-          无线网络传感技术
-          <text class="course-location">E0306</text>
-        </view>
-		<view class="course-block course-4"
-		      style="top: 0; left:12.5%;height: 180rpx;">
-		  无线网络传感技术
-		  <text class="course-location">E0306</text>
-		</view>
-		<view class="course-block course-3"
-		      style="top: 180rpx; height: 180rpx;">
-		  无线网络传感技术
-		  <text class="course-location">E0306</text>
-		</view>
+        <block wx:for="{{tableData}}" wx:key="*this" wx:for-item="row" wx:for-index="rowIndex">
+          <block wx:if="{{rowIndex > 0}}">
+            <block wx:for="{{row}}" wx:key="*this" wx:for-item="cell" wx:for-index="colIndex">
+              <block wx:if="{{colIndex > 0 && cell}}">
+                <view class="course-block" :style="{ top: `${(rowIndex - 1) * 180}rpx`, height: '180rpx', left: `${(colIndex - 1) * 12.5}%`, width: '12.5%' }">
+                  {{ cell }}
+                  <text class="course-location">{{ cell.split(' ')[1] }}</text>
+                </view>
+              </block>
+            </block>
+          </block>
+        </block>
       </view>
-	  
     </view>
   </view>
 </template>
 
+<script>
+import { mapState, mapActions } from 'vuex';
+
+export default {
+  data() {
+    return {
+      tableData: []
+    };
+  },
+  computed: {
+    ...mapState(['jsessionid'])
+  },
+  methods: {
+    ...mapActions(['fetchUserInfo']),
+    async fetchCourseData() {
+      if (!this.jsessionid) {
+        console.error("未获取到 JSESSIONID");
+        uni.showToast({
+          title: '未获取到 JSESSIONID',
+          icon: 'none'
+        });
+        return;
+      }
+
+      try {
+        const response = await uni.request({
+          url: `https://proxy-login.aluo18.top/cource?rxnj=2023&bjmc=23级计算机应用技术1&jsessionid=${this.jsessionid}`,
+          method: "GET"
+        });
+
+        if (response.statusCode === 200) {
+          this.tableData = response.data.table_data;
+        } else {
+          throw new Error(`请求失败，状态码: ${response.statusCode}`);
+        }
+      } catch (err) {
+        console.error("请求失败:", err);
+        uni.showToast({
+          title: '获取课程表失败，请检查网络或链接是否正确',
+          icon: 'none'
+        });
+      }
+    }
+  },
+  mounted() {
+    this.fetchCourseData();
+  }
+};
+</script>
 <style lang="less">
 .content {
   padding: 20rpx;
@@ -95,9 +140,17 @@
   position: absolute;
   width: 12.5%;
   border-radius: 2rpx;
-  color: white;
+  color: #333;
     font-size: 22rpx;
   box-shadow: 0 4rpx 12rpx rgba(0,0,0,0.1);
+  overflow: hidden;
+  
+  .course-text {
+	  white-space: nowrap;
+	  overflow: hidden;
+	  text-overflow: ellipsis;
+	  display: block;
+  }
   
   .course-location {
     display: block;
@@ -112,4 +165,5 @@
 .course-4 { background: #FFA07A; }
 .course-5 { background: #DDA0DD; }
 .course-6 { background: #20B2AA; }
+
 </style>
