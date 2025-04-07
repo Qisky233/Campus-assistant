@@ -18,7 +18,7 @@
 			</view>
 			<view class="intro-item">
 				<text class="intro-icon">💡</text>
-				<text class="intro-text">目前小程序仍处于试用阶段，欢迎反馈使用体验！</text>
+				<text class="intro-text">目前小程序处于MVP(最小可实行产品)阶段，欢迎反馈使用体验！</text>
 			</view>
 		</view>
 
@@ -44,10 +44,10 @@
 				</view>
 				
 				<!-- 寻物启事 -->
-				<view class="function-item" @click="navigateTo('lost')">
+				<view class<!-- ="function-item" @click="navigateTo('lost')">
 					<image class="function-icon" src="/static/images/index/失物招领.png" mode="aspectFit"></image>
 					<text class="function-text">寻物</text>
-				</view>
+				</view> -->
 			</view>
 		</view>
 

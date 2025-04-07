@@ -1,184 +1,184 @@
 <template>
-	<view>
-		<view class="container">
-		  <view class="header">
-		    <text>学生宿舍电费查询</text>
-		  </view>
-		  
-		  <view class="form-group">
-		    <text class="label">楼寓</text>
-			    <picker 
-			      :range="buildingList" 
-			      :value="buildingIndex" 
-			      @change="buildingChange"
-			      class="picker">
-			      <view class="picker-text">
-			        {{ buildingList[buildingIndex] }}
-			      </view>
-			    </picker>
-		      <view class="picker-text">
-		      </view>
-		    </picker>
-		  </view>
-		
-		  <view class="form-group">
-		    <text class="label">宿舍号：</text>
-		    <input 
-		      type="text" 
-		      placeholder="请输入宿舍号" 
-		      bindinput="dormitoryInput"
-		      class="input" />
-		  </view>
-		
-		  <view class="form-group">
-		    <text class="label">校验码：</text>
-		    <view class="captcha-box">
-		      <input 
-		        type="text" 
-		        placeholder="输入验证码" 
-		        class="captcha-input"
-		        bindinput="captchaInput" />
-		      <image 
-		        src="/images/captcha.png" 
-		        class="captcha-img"
-		        bindtap="refreshCaptcha" />
-		    </view>
-		  </view>
-		
-		  <button 
-		    type="primary" 
-		    bindtap="handleQuery"
-		    class="submit-btn">查询</button>
-		</view>
-	</view>
+  <view class="container">
+    <view class="header">
+      <text>学生宿舍电费查询</text>
+    </view>
+    
+    <view class="form-group">
+      <text class="label">楼寓</text>
+      <picker 
+        :range="buildingList" 
+        :value="buildingIndex" 
+        @change="buildingChange"
+        class="picker">
+        <view class="picker-text">
+          {{ buildingList[buildingIndex] }}
+        </view>
+      </picker>
+    </view>
+    
+    <view class="form-group">
+      <text class="label">宿舍号：</text>
+      <input 
+        type="text" 
+        placeholder="请输入宿舍号" 
+        @input="dormitoryInput"
+        class="input" />
+    </view>
+    
+    <view class="form-group">
+      <text class="label">校验码：</text>
+      <view class="captcha-box">
+        <input 
+          type="text" 
+          placeholder="输入验证码" 
+          class="captcha-input"
+          @input="captchaInput" />
+        <image 
+          :src="captchaUrl" 
+          class="captcha-img"
+          @tap="refreshCaptcha" />
+      </view>
+    </view>
+    
+    <button 
+      type="primary" 
+      @tap="handleQuery"
+      class="submit-btn"
+      :loading="loading">查询</button>
+  </view>
 </template>
 
 <script>
+import iconv from 'iconv-lite';
+
 export default {
   data() {
     return {
-      buildingList: ['男生1号楼', '男生2号楼', '女生3号楼'],
+      buildingList: ['男生1号楼', '男生2号楼', '男生3号楼', '女生1号楼', '女生2号楼', '女生3号楼', '女生4号楼', '女生5号楼'],
       buildingIndex: 0,
       dormitory: '',
       captcha: '',
-      captchaUrl: '/images/captcha.png?t=' + Date.now(), 
-      loading: false
+      captchaUrl: '', // 初始验证码图片链接为空，通过请求动态获取
+      loading: false,
+      jsessionid: '', // 用于存储 JSESSIONID
     };
   },
   methods: {
-    // 楼栋选择事件
     buildingChange(e) {
-      this.setData({
-        buildingIndex: e.detail.value
-      });
+      this.buildingIndex = e.detail.value;
     },
-
-    // 宿舍号输入事件
     dormitoryInput(e) {
-      this.setData({
-        dormitory: e.detail.value.replace(/[^\dA-Za-z]/g, '') // 过滤非法字符
-      });
+      this.dormitory = e.detail.value;
     },
-
-    // 验证码输入事件
     captchaInput(e) {
-      this.setData({
-        captcha: e.detail.value.toUpperCase() // 自动转大写
-      });
+      this.captcha = e.detail.value;
     },
-
-    // 刷新验证码
-    refreshCaptcha() {
-      this.setData({
-        captchaUrl: `/images/captcha.png?t=${Date.now()}` // 加时间戳防止缓存
-      });
-    },
-
-    // 提交查询
-    async handleQuery() {
-      // 防抖处理
-      if (this.loading) return;
-      this.setData({ loading: true });
-      
-      // 表单验证
-      if (!this.validateForm()) {
-        this.setData({ loading: false });
-        return;
-      }
-   // 调用接口逻辑
+    async refreshCaptcha() {
       try {
-        const res = await this.request('/api/query', {
-          building: this.data.buildingList[this.data.buildingIndex],
-          dormitory: this.data.dormitory,
-          captcha: this.data.captcha
+        this.loading = true; // 显示加载状态
+        const res = await uni.request({
+          url: 'https://e-loc.hnuu.edu.cn/image.jsp',
+          method: 'GET',
+          responseType: 'arraybuffer'
         });
-        if (res.code === 200) {
-          wx.navigateTo({
-            url: `/pages/result/result?balance=${res.data.balance}`
-          });
-        } else {
-          this.showError(res.msg);
-          this.refreshCaptcha(); 
-        }
-      } catch (err) {
-        this.showError('网络异常，请稍后重试');
-      } finally {
-        this.setData({ loading: false });
-      }
-    },
 
-    // 表单验证
-    validateForm() {
-      if (!this.data.dormitory) {
-        this.showError('请输入宿舍号');
-        return false;
-      }
-      if (!/^\d{3,4}$/.test(this.data.dormitory)) {
-        this.showError('宿舍号需为3-4位数字');
-        return false;
-      }
-      if (!this.data.captcha) {
-        this.showError('请输入验证码');
-        return false;
-      }
-      return true;
-    },
+        if (res.statusCode === 200) {
+          const base64 = uni.arrayBufferToBase64(res.data);
+          this.captchaUrl = `data:image/jpeg;base64,${base64}`;
 
-    // 封装请求方法
-    request(url, data) {
-      return new Promise((resolve, reject) => {
-        wx.request({
-          url: `https://yourdomain.com${url}`,
-          method: 'POST',
-          data,
-          header: {
-            'Content-Type': 'application/json'
-          },
-          success: (res) => {
-            if (res.statusCode === 200) {
-              resolve(res.data);
-            } else {
-              reject(res);
+          // 获取 JSESSIONID
+          const cookies = res.header['Set-Cookie'];
+          if (cookies) {
+            const cookieArray = cookies.split(';');
+            for (let cookie of cookieArray) {
+              const [key, value] = cookie.split('=');
+              if (key.trim() === 'JSESSIONID') {
+                this.jsessionid = value.trim();
+                break;
+              }
             }
-          },
-          fail: reject
+          }
+        } else {
+          throw new Error('验证码加载失败');
+        }
+      } catch (error) {
+        console.error('请求验证码时出错:', error);
+        uni.showToast({
+          title: '验证码加载失败，请检查网络或链接',
+          icon: 'none'
         });
-      });
+        this.refreshCaptcha(); // 自动重试刷新验证码
+      } finally {
+        this.loading = false; // 隐藏加载状态
+      }
     },
+    async handleQuery() {
+      const buildingCode = this.getBuildingCode(this.buildingList[this.buildingIndex]);
+      const queryUrl = `https://proxy-login.aluo18.top/electric?ly=${buildingCode}&ss=${this.dormitory}&rand=${this.captcha}&jsessionid=${this.jsessionid}`;
 
-    // 错误提示
-    showError(msg) {
-      wx.showToast({
-        title: msg,
-        icon: 'none',
-        duration: 2000
-      });
+      try {
+        this.loading = true; // 显示加载状态
+        const res = await uni.request({
+          url: queryUrl,
+          method: 'GET',
+          header: {
+            'Cookie': `JSESSIONID=${this.jsessionid}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (res.statusCode === 200) {
+          const result = res.data;
+          if (result.dormitory === '未找到' || result.remainingElectricity === '未找到') {
+            uni.showModal({
+              title: '查询结果',
+              content: '宿舍不存在或验证码错误，请重新输入',
+              showCancel: false
+            });
+          } else {
+            uni.showModal({
+              title: '查询结果',
+              content: `宿舍号：${result.dormitory}\n剩余电费：${result.remainingElectricity}`,
+              showCancel: false
+            });
+          }
+        } else {
+          throw new Error('查询失败');
+        }
+      } catch (error) {
+        console.error('查询时出错:', error);
+        uni.showToast({
+          title: '查询失败，请检查网络或链接',
+          icon: 'none'
+        });
+      } finally {
+        this.loading = false; // 隐藏加载状态
+        this.clearForm(); // 清空表单
+      }
+    },
+    getBuildingCode(buildingName) {
+      const buildingMap = {
+        '男生1号楼': '1-01',
+        '男生2号楼': '2-01',
+        '男生3号楼': '3-01',
+        '女生1号楼': '4-01',
+        '女生2号楼': '5-01',
+        '女生3号楼': '6-01',
+        '女生4号楼': '7-01',
+        '女生5号楼': '8-01'
+      };
+      return buildingMap[buildingName];
+    },
+    clearForm() {
+      this.dormitory = '';
+      this.captcha = '';
+      this.captchaUrl = '';
+      this.refreshCaptcha(); // 刷新验证码
     }
   },
-  
-  // 生命周期
-  onLoad() {
-    this.refreshCaptcha(); // 初始化验证码
+  mounted() {
+    this.refreshCaptcha(); // 页面加载时自动获取验证码
   }
 };
 </script>

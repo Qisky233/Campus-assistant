@@ -26,10 +26,10 @@
         <view class="time-slot">19:50<br>20:30</view>
       </view>
       <view class="course-container">
-        <block wx:for="{{tableData}}" wx:key="*this" wx:for-item="row" wx:for-index="rowIndex">
-          <block wx:if="{{rowIndex > 0}}">
-            <block wx:for="{{row}}" wx:key="*this" wx:for-item="cell" wx:for-index="colIndex">
-              <block wx:if="{{colIndex > 0 && cell}}">
+        <block v-for="(row, rowIndex) in tableData" :key="rowIndex">
+          <block v-if="rowIndex > 0">
+            <block v-for="(cell, colIndex) in row" :key="colIndex">
+              <block v-if="colIndex > 0 && cell">
                 <view class="course-block" :style="{ top: `${(rowIndex - 1) * 180}rpx`, height: '180rpx', left: `${(colIndex - 1) * 12.5}%`, width: '12.5%' }">
                   {{ cell }}
                   <text class="course-location">{{ cell.split(' ')[1] }}</text>
@@ -60,11 +60,20 @@ export default {
     async fetchCourseData() {
       if (!this.jsessionid) {
         console.error("未获取到 JSESSIONID");
-        uni.showToast({
-          title: '未获取到 JSESSIONID',
-          icon: 'none'
-        });
-        return;
+  //       uni.showToast({
+		// 	title: '请先登录',
+		// 	icon: 'none',
+		// 	duration: 2000 // 提示显示的时长（毫秒）
+		// });
+
+		// // 使用 setTimeout 来延迟跳转
+		// setTimeout(() => {
+		// 	// 提示关闭后跳转到登录页面
+		// 	uni.navigateTo({
+		// 		url: '/pages/login/login' // 假设登录页面路径为 pages/login/login
+		// 	});
+		// }, 2000); // 延迟时间与提示框的 duration 保持一致
+		return;
       }
 
       try {
@@ -86,6 +95,25 @@ export default {
         });
       }
     }
+  },
+  created() {
+	  if (!this.jsessionid) {
+	    console.error("未获取到 JSESSIONID");
+	    uni.showToast({
+	  			title: '请先登录',
+	  			icon: 'none',
+	  			duration: 2000 // 提示显示的时长（毫秒）
+	  		});
+	  
+	  		// 使用 setTimeout 来延迟跳转
+	  		setTimeout(() => {
+	  			// 提示关闭后跳转到登录页面
+	  			uni.navigateTo({
+	  				url: '/pages/login/login' // 假设登录页面路径为 pages/login/login
+	  			});
+	  		}, 2000); // 延迟时间与提示框的 duration 保持一致
+	  		return;
+	  }
   },
   mounted() {
     this.fetchCourseData();

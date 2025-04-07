@@ -38,6 +38,11 @@
       </view>
       <button class="login-button" @click="onLogin">登录</button>
     </view>
+	<view style="text-align: center;">
+		提示：多次试错可能封号
+		<br />
+		代理请求较慢，请耐心等候
+	</view>
   </view>
 </template>
 

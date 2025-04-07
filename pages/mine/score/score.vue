@@ -2,77 +2,111 @@
   <view class="container">
     <view class="header">
      <view class="message">
-		 <view class="subtitle" >姓名: 111</view>
-		  <view class="subtitle">学号: 2022307011715</view>
-		 <view class="subtitle">学院:信息工程学院</view>
-		  <view class="subtitle">班级:计算机应用技术3班</view>
+		 <view class="subtitle" >姓名: {{ userInfo.xm }}</view>
+		  <view class="subtitle">学号: {{ userInfo.yhxh }}</view>
+		 <view class="subtitle">学院:{{ userInfo.yxb }}</view>
+		  <view class="subtitle">班级:{{ userInfo.bjmc }}</view>
      </view>
 	 <image class="avatar" src="/static/images/mine/avatar.jpg" mode="aspectFill"/>
     </view>
-    <view class="semester">
-      <text class="semester-title">2024-2025-1</text>
-      <view class="table">
-        <view class="table-row">
-          <view class="table-cell">课程</view>
-          <view class="table-cell">类型</view>
-          <view class="table-cell">学分</view>
-          <view class="table-cell">成绩</view>
-        </view>
-        <view 
-          v-for="(item, index) in grades" 
-          :key="index" 
-          class="table-row"
-        >
-          <view class="table-cell">{{item.course}}</view>
-            <view class="table-cell">{{item.type}}</view>
-            <view class="table-cell">{{item.credit}}</view>
-            <view class="table-cell">{{item.grade}}</view>
-          </view>
+    <view v-for="(semesterData, index) in score" :key="index" class="semester">
+	  <text class="semester-title">{{ semesterData.semester }}</text>
+	  <view class="table">
+		<view class="table-row">
+		  <view class="table-cell">课程</view>
+		  <view class="table-cell">类型</view>
+		  <view class="table-cell">学分</view>
+		  <view class="table-cell">成绩</view>
+		</view>
+		<view
+		  v-for="(item, gradeIndex) in semesterData.data"
+		  :key="gradeIndex"
+		  class="table-row"
+		>
+		  <view class="table-cell">{{ item['课程/环节'] }}</view>
+		  <view class="table-cell">{{ item['类别'] }}</view>
+		  <view class="table-cell">{{ item['学分'] }}</view>
+		  <view class="table-cell">{{ item['综合成绩'] }}</view>
+		</view>
 	  </view>
-    </view>
-    <view class="semester">
-      <text class="semester-title">2023-2024-2</text>
-      <view class="table">
-        <view class="table-row">
-          <view class="table-cell">课程</view>
-          <view class="table-cell">类型</view>
-          <view class="table-cell">学分</view>
-          <view class="table-cell">成绩</view>
-        </view>
-        <view 
-          v-for="(item, index) in grades2" 
-          :key="index" 
-          class="table-row"
-        > 
-            <view class="table-cell">{{item.course}}</view>
-            <view class="table-cell">{{item.type}}</view>
-            <view class="table-cell">{{item.credit}}</view>
-            <view class="table-cell">{{item.grade}}</view>
-          </view>
-      </view>
-    </view>
-  </view>
+	</view>
+	</view>
 </template>
 
 <script>
+import { mapGetters, mapActions } from 'vuex';
 export default {
+	computed: {
+    ...mapGetters([
+      'isLoggedIn',
+      'getJsessionid',
+      'getUserInfo',
+	  'getTgt',
+	  'getTicket'
+    ]),
+    jsessionid() {
+      return this.getJsessionid;
+    },
+    userInfo() {
+      return this.getUserInfo;
+    },
+	tgt() {
+		return this.getTgt;
+	},
+	ticket() {
+		return this.getTicket
+	}
+  },
   data() {
     return {
-      grades: [
-        { course: '管理信息系统', type: '必修', credit: 4, grade: 89.5 },
-        { course: '网络数据库', type: '必修', credit: 3.5, grade: 90.0 },
-        { course: '网络编程', type: '必修', credit: 4, grade: 78.5 },
-        { course: '运筹学', type: '必修', credit: 3, grade: '缓考' },
-        { course: '课程设计', type: '必修', credit: 2, grade: 88.5 }
-      ],
-      grades2: [
-        { course: '数据库原理', type: '必修', credit: 3.5, grade: 82.5 },
-        { course: '可视化程序设计', type: '必修', credit: 4, grade: 75.0 },
-        { course: '病案信息管理学', type: '必修', credit: 3.5, grade: 74.5 },
-        { course: '人文英语', type: '必修', credit: 3.5, grade: 64.5 },
-        { course: '现代基础医学概论', type: '必修', credit: 3, grade: 85.5 }
-      ]
+      score: []
     };
+  },
+  created() {
+	  this.getScore()
+	  if(this.userInfo.xm == '未登录') {
+		  uni.showToast({
+		  	title: '请先登录',
+		  	icon: 'none',
+		  	duration: 2000 // 提示显示的时长（毫秒）
+		  });
+		    
+		  // 使用 setTimeout 来延迟跳转
+		  setTimeout(() => {
+		  	// 提示关闭后跳转到登录页面
+		  	uni.navigateTo({
+		  		url: '/pages/login/login' // 假设登录页面路径为 pages/login/login
+		  	});
+		  }, 2000); // 延迟时间与提示框的 duration 保持一致
+		  return;
+	  }
+  },
+  methods: {
+	  getScore() {
+		if (!this.isLoggedIn) {
+			console.error('用户未登录');
+			return;
+		}
+		if (!this.userInfo || !this.userInfo.rxnj) {
+			console.error('用户信息不完整');
+			return;
+		}
+		uni.request({
+			url: `https://proxy-login.aluo18.top/score?jsessionid=${this.jsessionid}&rxnj=${this.userInfo.rxnj}`,
+			method: 'GET',
+			success: (res) => {
+				if (res.statusCode === 200) {
+					this.score = res.data;
+					console.log('成绩获取成功', this.score);
+				} else {
+					console.error('请求失败，状态码：', res.statusCode);
+				}
+			},
+			fail: (err) => {
+				console.error('请求失败', err);
+			}
+		});
+	}
   }
 }
 </script>

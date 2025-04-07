@@ -1,6 +1,11 @@
 import App from './App'
 import store from './store'  // 确保路径正确
 
+import { TextEncoder, TextDecoder } from 'text-decoding';
+
+global.TextEncoder = TextEncoder;
+global.TextDecoder = TextDecoder;
+
 // #ifndef VUE3
 import Vue from 'vue'
 Vue.config.productionTip = false
